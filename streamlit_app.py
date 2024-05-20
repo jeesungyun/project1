@@ -1,10 +1,11 @@
+import os
 import openai
 import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # API 키 설정
-openai.api_key = "your_openai_api_key"
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 사용자 입력 받기
 st.title("음식 추천 시스템")
