@@ -48,8 +48,8 @@ user_input_text = create_user_input_text(category, style, soup, calorie, spicy, 
 # 사용자 입력을 임베딩 벡터로 변환하는 함수
 def get_embedding(text):
     response = openai.Embedding.create(
-        model="text-embedding-ada-002",
-        input=[text]
+        input=text,
+        model="text-embedding-ada-002"
     )
     return response['data'][0]['embedding']
 
