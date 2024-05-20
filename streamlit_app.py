@@ -9,36 +9,46 @@ import time
 # API 키 설정
 openai.api_key = 'sk-proj-vLWijFZ08qgHB4kBRiouT3BlbkFJw0pwSblnOC5c9leoTwZS'
 
-# 초기 설정: 사용자 수 입력 받기
-num_users = st.number_input("총 몇명이 고를건가요?", min_value=1, max_value=10, step=1)
-start_button = st.button("시작")
+# 세션 상태 초기화
+if 'user_inputs' not in st.session_state:
+    st.session_state.user_inputs = []
+if 'current_user' not in st.session_state:
+    st.session_state.current_user = 1
+if 'start_button' not in st.session_state:
+    st.session_state.start_button = False
+if 'num_users' not in st.session_state:
+    st.session_state.num_users = 1
 
-# 사용자 데이터 저장
-user_inputs = []
+# 사용자 수 입력 받기
+if not st.session_state.start_button:
+    st.session_state.num_users = st.number_input("총 몇명이 고를건가요?", min_value=1, max_value=10, step=1)
+    if st.button("시작"):
+        st.session_state.start_button = True
 
-if start_button:
-    for user_num in range(1, num_users + 1):
-        st.header(f"User {user_num}")
-        
-        # 음식 카테고리 선택 (복수 선택 가능)
-        categories = st.multiselect("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"], key=f"categories_{user_num}")
-        
-        # 나머지 질문들
-        style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"], key=f"style_{user_num}")
-        soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"], key=f"soup_{user_num}")
-        calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"], key=f"calorie_{user_num}")
-        spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"], key=f"spicy_{user_num}")
-        sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"], key=f"sweet_{user_num}")
-        salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"], key=f"salty_{user_num}")
-        
-        complete_button = st.button(f"User {user_num} 선택 완료", key=f"complete_{user_num}")
-        
-        if complete_button:
-            user_input_text = f"카테고리: {', '.join(categories)}, 스타일: {style}, 국물 여부: {soup}, 칼로리: {calorie}, 매운 정도: {spicy}, 단 정도: {sweet}, 짠 정도: {salty}"
-            user_inputs.append(user_input_text)
-            st.experimental_rerun()  # 다음 사용자 입력을 위해 페이지 리로드
+if st.session_state.start_button:
+    user_num = st.session_state.current_user
+    st.header(f"User {user_num}")
 
-if len(user_inputs) == num_users:
+    # 음식 카테고리 선택 (복수 선택 가능)
+    categories = st.multiselect("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"], key=f"categories_{user_num}")
+
+    # 나머지 질문들
+    style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"], key=f"style_{user_num}")
+    soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"], key=f"soup_{user_num}")
+    calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"], key=f"calorie_{user_num}")
+    spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"], key=f"spicy_{user_num}")
+    sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"], key=f"sweet_{user_num}")
+    salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"], key=f"salty_{user_num}")
+
+    if st.button(f"User {user_num} 선택 완료"):
+        user_input_text = f"카테고리: {', '.join(categories)}, 스타일: {style}, 국물 여부: {soup}, 칼로리: {calorie}, 매운 정도: {spicy}, 단 정도: {sweet}, 짠 정도: {salty}"
+        st.session_state.user_inputs.append(user_input_text)
+        if st.session_state.current_user < st.session_state.num_users:
+            st.session_state.current_user += 1
+        else:
+            st.session_state.start_button = False
+
+if len(st.session_state.user_inputs) == st.session_state.num_users:
     st.write("모든 사용자가 선택을 완료했습니다.")
     
     # 사용자 입력을 임베딩 벡터로 변환하는 함수 (재시도 로직 추가)
@@ -56,7 +66,7 @@ if len(user_inputs) == num_users:
                 else:
                     raise
     
-    user_embeddings = [get_embedding(user_input) for user_input in user_inputs]
+    user_embeddings = [get_embedding(user_input) for user_input in st.session_state.user_inputs]
     
     # 메뉴 데이터
     menu_db = {
