@@ -6,7 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from openai.error import RateLimitError
 
 # API 키 설정
-openai.api_key = 'sk-proj-Vj7w8bF7qeC4HhtJRnrHT3BlbkFJ1IKvhBtYMDzleZSq9iWV'
+openai.api_key = 'sk-proj-vLWijFZ08qgHB4kBRiouT3BlbkFJw0pwSblnOC5c9leoTwZS'
 
 # 사용자 입력 받기
 st.title("음식 추천 시스템")
