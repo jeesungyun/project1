@@ -4,6 +4,7 @@ import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from openai.error import RateLimitError
+import time
 
 # API 키 설정
 openai.api_key = 'sk-proj-vLWijFZ08qgHB4kBRiouT3BlbkFJw0pwSblnOC5c9leoTwZS'
@@ -20,17 +21,17 @@ if start_button:
         st.header(f"User {user_num}")
         
         # 음식 카테고리 선택 (복수 선택 가능)
-        categories = st.multiselect("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"])
+        categories = st.multiselect("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"], key=f"categories_{user_num}")
         
         # 나머지 질문들
-        style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"])
-        soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"])
-        calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"])
-        spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"])
-        sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"])
-        salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"])
+        style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"], key=f"style_{user_num}")
+        soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"], key=f"soup_{user_num}")
+        calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"], key=f"calorie_{user_num}")
+        spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"], key=f"spicy_{user_num}")
+        sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"], key=f"sweet_{user_num}")
+        salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"], key=f"salty_{user_num}")
         
-        complete_button = st.button(f"User {user_num} 선택 완료")
+        complete_button = st.button(f"User {user_num} 선택 완료", key=f"complete_{user_num}")
         
         if complete_button:
             user_input_text = f"카테고리: {', '.join(categories)}, 스타일: {style}, 국물 여부: {soup}, 칼로리: {calorie}, 매운 정도: {spicy}, 단 정도: {sweet}, 짠 정도: {salty}"
