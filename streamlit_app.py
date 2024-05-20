@@ -1,11 +1,10 @@
-import os
 import openai
 import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # 환경 변수에서 API 키 읽기
-openai.api_key = os.getenv("API_KEY")
+openai.api_key = sk-proj-7nfXY1QfnNfz3ewjMO2tT3BlbkFJA9NRvm8LNcp18lI5iBNz
 
 # 사용자 입력 받기
 st.title("음식 추천 시스템")
