@@ -4,8 +4,6 @@ import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-pip install openai==0.28
-
 # API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
