@@ -1,4 +1,4 @@
-import time
+import os
 import openai
 import streamlit as st
 import numpy as np
@@ -8,66 +8,60 @@ from openai.error import RateLimitError
 # API 키 설정
 openai.api_key = 'sk-proj-vLWijFZ08qgHB4kBRiouT3BlbkFJw0pwSblnOC5c9leoTwZS'
 
-# 사용자 입력 받기
-st.title("음식 추천 시스템")
+# 초기 설정: 사용자 수 입력 받기
+num_users = st.number_input("총 몇명이 고를건가요?", min_value=1, max_value=10, step=1)
+start_button = st.button("시작")
 
-# 프롬프트 1: 음식 카테고리 선택
-category = st.selectbox("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"])
+# 사용자 데이터 저장
+user_inputs = []
 
-# 프롬프트 2: 음식 스타일 선택
-style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"])
+if start_button:
+    for user_num in range(1, num_users + 1):
+        st.header(f"User {user_num}")
+        
+        # 음식 카테고리 선택 (복수 선택 가능)
+        categories = st.multiselect("음식 카테고리", ["한식", "중식", "일식", "양식", "동남아"])
+        
+        # 나머지 질문들
+        style = st.radio("음식 스타일", ["기름진 음식", "상관 없음", "담백한 음식"])
+        soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"])
+        calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"])
+        spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"])
+        sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"])
+        salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"])
+        
+        complete_button = st.button(f"User {user_num} 선택 완료")
+        
+        if complete_button:
+            user_input_text = f"카테고리: {', '.join(categories)}, 스타일: {style}, 국물 여부: {soup}, 칼로리: {calorie}, 매운 정도: {spicy}, 단 정도: {sweet}, 짠 정도: {salty}"
+            user_inputs.append(user_input_text)
+            st.experimental_rerun()  # 다음 사용자 입력을 위해 페이지 리로드
 
-# 프롬프트 3: 국물 여부 선택
-soup = st.radio("국물 여부", ["국물 요리", "상관 없음", "비국물 요리"])
-
-# 프롬프트 4: 칼로리 선택
-calorie = st.radio("칼로리", ["저칼로리", "상관 없음", "고칼로리"])
-
-# 프롬프트 5: 매운 정도 선택
-spicy = st.radio("매운 정도", ["안매운거", "상관 없음", "매운거"])
-
-# 프롬프트 6: 단 정도 선택
-sweet = st.radio("단 정도", ["안단거", "상관 없음", "단거"])
-
-# 프롬프트 7: 짠 정도 선택
-salty = st.radio("짠 정도", ["안짠거", "상관 없음", "짠거"])
-
-# 사용자 입력을 텍스트로 변환하는 함수
-def create_user_input_text(category, style, soup, calorie, spicy, sweet, salty):
-    style_text = "기름진 음식" if style == "기름진 음식" else ("담백한 음식" if style == "담백한 음식" else "상관 없음")
-    soup_text = "국물 요리" if soup == "국물 요리" else ("비국물 요리" if soup == "비국물 요리" else "상관 없음")
-    calorie_text = "저칼로리" if calorie == "저칼로리" else ("고칼로리" if calorie == "고칼로리" else "상관 없음")
-    spicy_text = "안매운거" if spicy == "안매운거" else ("매운거" if spicy == "매운거" else "상관 없음")
-    sweet_text = "안단거" if sweet == "안단거" else ("단거" if sweet == "단거" else "상관 없음")
-    salty_text = "안짠거" if salty == "안짠거" else ("짠거" if salty == "짠거" else "상관 없음")
+if len(user_inputs) == num_users:
+    st.write("모든 사용자가 선택을 완료했습니다.")
     
-    return f"카테고리: {category}, 스타일: {style_text}, 국물 여부: {soup_text}, 칼로리: {calorie_text}, 매운 정도: {spicy_text}, 단 정도: {sweet_text}, 짠 정도: {salty_text}"
-
-# 사용자 입력을 텍스트로 생성
-user_input_text = create_user_input_text(category, style, soup, calorie, spicy, sweet, salty)
-
-# 사용자 입력을 임베딩 벡터로 변환하는 함수 (재시도 로직 추가)
-def get_embedding(text, max_retries=5):
-    for retry in range(max_retries):
-        try:
-            response = openai.Embedding.create(
-                model="text-embedding-ada-002",
-                input=[text]
-            )
-            return response['data'][0]['embedding']
-        except RateLimitError:
-            if retry < max_retries - 1:
-                time.sleep(20)  # 재시도 전 대기 시간 설정
-            else:
-                raise
-
-user_embedding = get_embedding(user_input_text)
-
-# 메뉴 데이터
-menu_db = {
-    "돈까스": "일식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
-    "스시": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 단거",
-    "회": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+    # 사용자 입력을 임베딩 벡터로 변환하는 함수 (재시도 로직 추가)
+    def get_embedding(text, max_retries=5):
+        for retry in range(max_retries):
+            try:
+                response = openai.Embedding.create(
+                    model="text-embedding-ada-002",
+                    input=[text]
+                )
+                return response['data'][0]['embedding']
+            except RateLimitError:
+                if retry < max_retries - 1:
+                    time.sleep(20)  # 재시도 전 대기 시간 설정
+                else:
+                    raise
+    
+    user_embeddings = [get_embedding(user_input) for user_input in user_inputs]
+    
+    # 메뉴 데이터
+    menu_db = {
+        "돈까스": "일식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "스시": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 단거",
+         "회": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
     "라멘": "일식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
     "소바": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
     "우동": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 짠거, 단거",
@@ -99,23 +93,21 @@ menu_db = {
     "쌀국수": "동남아, 담백한 음식, 국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
     "분짜": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
     "팟타이": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거"
-}
-
-# 메뉴 설명 임베딩 생성
-menu_embeddings = {menu: get_embedding(description) for menu, description in menu_db.items()}
-
-# 코사인 유사도를 통해 가장 유사도가 낮은 메뉴 찾기
-def find_least_similar(query_embedding, menu_embeddings):
-    min_similarity = 1
-    least_similar = None
-    for menu, embedding in menu_embeddings.items():
-        similarity = cosine_similarity([query_embedding], [embedding])[0][0]
-        if similarity < min_similarity:
-            min_similarity = similarity
-            least_similar = menu
-    return least_similar
-
-# 유사도가 가장 낮은 메뉴 찾기
-least_similar_menu = find_least_similar(user_embedding, menu_embeddings)
-
-st.write("임베딩을 사용한 유사도가 가장 낮은 메뉴 (추천 메뉴):", least_similar_menu)
+    }
+    
+    # 메뉴 설명 임베딩 생성
+    menu_embeddings = {menu: get_embedding(description) for menu, description in menu_db.items()}
+    
+    # 코사인 유사도를 통해 가장 유사도가 낮은 메뉴 찾기
+    def find_least_similar(user_embeddings, menu_embeddings):
+        combined_similarities = np.zeros(len(menu_embeddings))
+        for user_embedding in user_embeddings:
+            similarities = np.array([cosine_similarity([user_embedding], [embedding])[0][0] for embedding in menu_embeddings.values()])
+            combined_similarities += similarities
+        least_similar_menu = list(menu_embeddings.keys())[np.argmin(combined_similarities)]
+        return least_similar_menu
+    
+    # 유사도가 가장 낮은 메뉴 찾기
+    least_similar_menu = find_least_similar(user_embeddings, menu_embeddings)
+    
+    st.write("임베딩을 사용한 유사도가 가장 낮은 메뉴 (추천 메뉴):", least_similar_menu)
