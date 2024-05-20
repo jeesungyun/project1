@@ -11,14 +11,10 @@ openai.api_key = st.secrets["general"]["OPENAI_API_KEY"]
 # 세션 상태 초기화
 if 'user_inputs' not in st.session_state:
     st.session_state.user_inputs = []
-if 'current_user' not in st.session_state:
-    st.session_state.current_user = 1
-if 'start_button' not in st.session_state:
-    st.session_state.start_button = False
 if 'num_users' not in st.session_state:
     st.session_state.num_users = 1
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
+if 'start_button' not in st.session_state:
+    st.session_state.start_button = False
 
 # 챗봇 응답 생성 함수
 def get_chatbot_response(prompt, max_retries=5):
@@ -48,26 +44,19 @@ if not st.session_state.start_button:
         st.session_state.start_button = True
 
 if st.session_state.start_button:
-    user_num = st.session_state.current_user
-    st.header(f"User {user_num}")
+    for user_num in range(1, st.session_state.num_users + 1):
+        st.header(f"User {user_num}")
 
-    # 사용자 주관식 입력 받기
-    st.write("선호하지 않는 음식을 입력하세요. 예시:")
-    st.write("카테고리(한식/일식/중식/양식/동남아식 등), 기름진 음식, 고칼로리, 매운 음식 등")
-    user_input = st.text_input("먹기 싫은 음식을 입력하세요:", key=f"user_input_{user_num}")
-    if user_input:
-        st.session_state.chat_history.append(f"User {user_num}: {user_input}")
-        chatbot_response = get_chatbot_response(user_input)
-        st.session_state.chat_history.append(f"Chatbot: {chatbot_response}")
-
-        st.text_area("대화 기록", value="\n".join(st.session_state.chat_history), height=200, key=f"chat_history_{user_num}")
-
-    if st.button(f"User {user_num} 선택 완료"):
-        st.session_state.user_inputs.append(user_input)
-        if st.session_state.current_user < st.session_state.num_users:
-            st.session_state.current_user += 1
-        else:
-            st.session_state.start_button = False
+        # 사용자 주관식 입력 받기
+        st.write("선호하지 않는 음식을 입력하세요. 예시:")
+        st.write("카테고리(한식/일식/중식/양식/동남아식 등), 기름진 음식, 고칼로리, 매운 음식 등")
+        user_input = st.text_input("먹기 싫은 음식을 입력하세요:", key=f"user_input_{user_num}")
+        
+        if user_input:
+            if len(st.session_state.user_inputs) < user_num:
+                st.session_state.user_inputs.append(user_input)
+            else:
+                st.session_state.user_inputs[user_num - 1] = user_input
 
 if len(st.session_state.user_inputs) == st.session_state.num_users:
     st.write("모든 사용자가 선택을 완료했습니다.")
@@ -98,6 +87,38 @@ if len(st.session_state.user_inputs) == st.session_state.num_users:
     menu_db = {
         "돈까스": "일식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
         "스시": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 단거"
+         "회": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+        "라멘": "일식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "소바": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+        "우동": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 짠거, 단거",
+        "덮밥": "일식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
+        "커리": "일식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "짜장면": "중식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 단거",
+        "탕수육": "중식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 안짠거, 단거",
+        "짬뽕": "중식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "볶음밥": "중식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
+        "마라탕": "중식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "마라샹궈": "중식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "양꼬치": "중식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "고기구이(삼겹살)": "한식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "국밥": "한식, 기름진 음식, 국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
+        "보쌈": "한식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "불고기": "한식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 단거",
+        "비빔밥": "한식, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
+        "김치찌개": "한식, 기름진 음식, 국물 요리, 중간칼로리, 매운거, 짠거, 안단거",
+        "떡볶이": "한식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 안짠거, 단거",
+        "국수": "한식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+        "김밥": "한식, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
+        "피자": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "파스타": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 단거",
+        "스테이크": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "뇨끼": "양식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+        "샐러드": "양식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
+        "햄버거": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
+        "샌드위치": "양식, 담백한 음식, 비국물 요리, 고칼로리, 안매운거, 안짠거, 안단거",
+        "쌀국수": "동남아, 담백한 음식, 국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
+        "분짜": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
+        "팟타이": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거"
     }
 
     # 메뉴 설명 임베딩 생성
