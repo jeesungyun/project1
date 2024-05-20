@@ -15,6 +15,8 @@ if 'num_users' not in st.session_state:
     st.session_state.num_users = 1
 if 'start_button' not in st.session_state:
     st.session_state.start_button = False
+if 'recommendations' not in st.session_state:
+    st.session_state.recommendations = []
 
 # 챗봇 응답 생성 함수
 def get_chatbot_response(prompt, max_retries=5):
@@ -87,38 +89,9 @@ if len(st.session_state.user_inputs) == st.session_state.num_users:
     menu_db = {
         "돈까스": "일식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
         "스시": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 단거",
-        "회": "일식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
-        "라멘": "일식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
-        "소바": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
-        "우동": "일식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 짠거, 단거",
-        "덮밥": "일식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
-        "커리": "일식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
+        "김치찌개": "한식, 매운 음식, 국물 요리, 중간칼로리, 매운거, 짠거, 안단거",
         "짜장면": "중식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 단거",
-        "탕수육": "중식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 안짠거, 단거",
-        "짬뽕": "중식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
-        "볶음밥": "중식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
-        "마라탕": "중식, 기름진 음식, 국물 요리, 고칼로리, 매운거, 짠거, 안단거",
-        "마라샹궈": "중식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 짠거, 안단거",
-        "양꼬치": "중식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 짠거, 안단거",
-        "고기구이(삼겹살)": "한식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
-        "국밥": "한식, 기름진 음식, 국물 요리, 중간칼로리, 안매운거, 짠거, 안단거",
-        "보쌈": "한식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
-        "불고기": "한식, 기름진 음식, 비국물 요리, 중간칼로리, 안매운거, 짠거, 단거",
-        "비빔밥": "한식, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
-        "김치찌개": "한식, 기름진 음식, 국물 요리, 중간칼로리, 매운거, 짠거, 안단거",
-        "떡볶이": "한식, 기름진 음식, 비국물 요리, 고칼로리, 매운거, 안짠거, 단거",
-        "국수": "한식, 담백한 음식, 국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
-        "김밥": "한식, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
-        "피자": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
         "파스타": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 단거",
-        "스테이크": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
-        "뇨끼": "양식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
-        "샐러드": "양식, 담백한 음식, 비국물 요리, 저칼로리, 안매운거, 안짠거, 안단거",
-        "햄버거": "양식, 기름진 음식, 비국물 요리, 고칼로리, 안매운거, 짠거, 안단거",
-        "샌드위치": "양식, 담백한 음식, 비국물 요리, 고칼로리, 안매운거, 안짠거, 안단거",
-        "쌀국수": "동남아, 담백한 음식, 국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
-        "분짜": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거",
-        "팟타이": "동남아, 담백한 음식, 비국물 요리, 중간칼로리, 안매운거, 안짠거, 안단거"
     }
 
     # 메뉴 설명 임베딩 생성
@@ -126,15 +99,25 @@ if len(st.session_state.user_inputs) == st.session_state.num_users:
     menu_embeddings = {menu: embedding for menu, embedding in menu_embeddings.items() if embedding is not None}  # None 값 제거
 
     # 코사인 유사도를 통해 가장 유사도가 낮은 메뉴 찾기
-    def find_least_similar(user_embeddings, menu_embeddings):
+    def find_least_similar(user_embeddings, menu_embeddings, num_results=3):
         combined_similarities = np.zeros(len(menu_embeddings))
         for user_embedding in user_embeddings:
             similarities = np.array([cosine_similarity([user_embedding], [embedding])[0][0] for embedding in menu_embeddings.values()])
             combined_similarities += similarities
-        least_similar_menu = list(menu_embeddings.keys())[np.argmin(combined_similarities)]
-        return least_similar_menu
+        least_similar_indices = np.argsort(combined_similarities)[:num_results]
+        least_similar_menus = [list(menu_embeddings.keys())[index] for index in least_similar_indices]
+        return least_similar_menus
 
     # 유사도가 가장 낮은 메뉴 찾기
-    least_similar_menu = find_least_similar(user_embeddings, menu_embeddings)
+    st.session_state.recommendations = find_least_similar(user_embeddings, menu_embeddings)
 
-    st.write("임베딩을 사용한 유사도가 가장 낮은 메뉴 (추천 메뉴):", least_similar_menu)
+    st.write("추천 메뉴:")
+    for recommendation in st.session_state.recommendations:
+        st.write(recommendation)
+
+    if st.button("다시 추천하기"):
+        st.session_state.recommendations = find_least_similar(user_embeddings, menu_embeddings)
+        st.experimental_rerun()
+
+    if st.button("입력 완료"):
+        st.write("모든 입력이 완료되었습니다.")
