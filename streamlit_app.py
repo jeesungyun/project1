@@ -3,8 +3,8 @@ import streamlit as st
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-# 환경 변수에서 API 키 읽기
-openai.api_key = 'sk-proj-7nfXY1QfnNfz3ewjMO2tT3BlbkFJA9NRvm8LNcp18lI5iBNz'
+# API 키 설정
+openai.api_key = "your_openai_api_key"
 
 # 사용자 입력 받기
 st.title("음식 추천 시스템")
@@ -44,11 +44,11 @@ def create_user_input_text(category, style, soup, calorie, spicy, sweet, salty):
 # 사용자 입력을 텍스트로 생성
 user_input_text = create_user_input_text(category, style, soup, calorie, spicy, sweet, salty)
 
-# 사용자 입력을 임베딩 벡터로 변환
+# 사용자 입력을 임베딩 벡터로 변환하는 함수
 def get_embedding(text):
     response = openai.Embedding.create(
-        model="text-embedding-ada-002",
-        input=text
+        input=text,
+        model="text-embedding-ada-002"
     )
     return response['data'][0]['embedding']
 
