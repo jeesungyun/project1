@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # API 키 설정
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = sk-proj-7nfXY1QfnNfz3ewjMO2tT3BlbkFJA9NRvm8LNcp18lI5iBNz
 
 # 사용자 입력 받기
 st.title("음식 추천 시스템")
