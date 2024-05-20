@@ -7,7 +7,7 @@ from openai.error import RateLimitError
 import time
 
 # API 키 설정
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = st.secrets["general"]["OPENAI_API_KEY"]
 
 # 세션 상태 초기화
 if 'user_inputs' not in st.session_state:
