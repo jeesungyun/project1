@@ -140,7 +140,7 @@ if len(st.session_state.user_inputs) == st.session_state.num_users:
     # 유사도가 가장 낮은 메뉴 찾기
     st.session_state.recommendations = find_least_similar(user_embeddings, menu_embeddings)
 
-    st.write("임베딩을 사용한 유사도가 가장 낮은 메뉴 (추천 메뉴):")
+    st.write("추천 메뉴:")
     for recommendation in st.session_state.recommendations:
         st.write(recommendation)
 
